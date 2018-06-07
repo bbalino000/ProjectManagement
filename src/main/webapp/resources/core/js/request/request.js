@@ -154,14 +154,22 @@ function initReqInfo(){
 		if(nvl($('#reqNo').val(), '') == ''){
 			insertRequest();
 		}else{
-			/* added by SHARIE MANIPON 11.21.2017 */
-			var message = "Hi, "+ $('#reqRequestor').val() + "\n\nYour project has been approved!";
-			   if($('#projTotBudget').val() == '0') {
-				message = message + "\n\nNote: You have 0.00 balance as your total budget for the project.";
+			// Added By Bryan
+			var errCount = checkRequired("approve");
+			if(errCount == 0){
+				/* added by SHARIE MANIPON 11.21.2017 */
+				var message = "Hi, "+ $('#reqRequestor').val() + "\n\nYour project has been approved!";
+				   if($('#projTotBudget').val() == '0') {
+					message = message + "\n\nNote: You have 0.00 balance as your total budget for the project.";
+				}
+				$("#reqUpdateBtn").hide();
+				approveRequest();
+				sendEmailReq($('#reqNo').val(), message);
+			}else{
+				$('#savingSuccess').modal('toggle');
+				$('#savingSuccess').find("#gridSystemModalLabel").text('Warning');
+				$('#saveProjNo').html('Please fill all the required fields.');
 			}
-			$("#reqUpdateBtn").hide();
-			approveRequest();
-			sendEmailReq($('#reqNo').val(), message);
 		}   
 		//$("#reqUpdateBtn").hide();
 	});
@@ -172,7 +180,17 @@ function updateBtnFunction(){
 	$('#reqUpdateBtn').show();
 	$('#reqUpdateBtn').attr('disabled', false);
 	$('#reqUpdateBtn').click(function(){
-		updateProj();
+		
+		//Added by Bryan
+		var errCount = checkRequired("update");
+		if(errCount == 0){
+			updateProj();
+		}else{
+			$('#savingSuccess').modal('toggle');
+			$('#savingSuccess').find("#gridSystemModalLabel").text('Warning');
+			$('#saveProjNo').html('Please fill all the required fields.');
+		}
+		
 		setTimeout(function(){
 			updateReq();
 		}, 1000);

@@ -264,11 +264,17 @@ function initProjBtn(){
 	
 	$('#projSaveBtn').click(function(){
 		if(nvl($('#projNo').val(), '') == ''){
-			insertProj();
+			var errCount = checkRequired("new");
+			if(errCount == 0){
+				insertProj();
+			}else{
+				$('#savingSuccess').modal('toggle');
+				$('#savingSuccess').find("#gridSystemModalLabel").text('Warning');
+				$('#saveProjNo').html('Please fill all the required fields.');
+			}
 		}else{
 			updateProj();
 		}
-		
 	});
 	
 	$('#dropApproved').click(function(){
@@ -286,6 +292,79 @@ function initProjBtn(){
 	});
 	
 	/*	Rochelle - END*/
+}
+
+// Added By Bryan
+function checkRequired(status){
+	var fields = [];
+	
+	if(status == "new"){
+		fields.projInfo 	= $('#projName');
+		fields.busUnit 		= $('#bussinessUnit');
+		fields.projManager 	= $('#projManager');
+		fields.status 		= $('#projStatus');
+		fields.projPSD		= $('#projPSD');
+		fields.projPFD		= $('#projPFD');
+		fields.projASD	 	= $('#projASD');
+		fields.projACD		= $('#projACD');
+		
+		if(useraccess != "bu"){
+			fields.os 			= $('#projOS');
+			fields.middleware 	= $('#projMW');
+			fields.application  = $('#projApp');
+			fields.cpu			= $('#projCPU');
+			fields.memory		= $('#projMemory');
+		}
+	}
+	
+	if(status == "approve"){
+//		fields.projInfo 	= $('#projName');
+//		fields.busUnit 		= $('#bussinessUnit');
+//		fields.projManager 	= $('#projManager');
+//		fields.status 		= $('#projStatus');
+		fields.projPSD		= $('#projPSD');
+		fields.projPFD		= $('#projPFD');
+		fields.projASD	 	= $('#projASD');
+		fields.projACD		= $('#projACD');
+		fields.os 			= $('#projOS');
+		fields.middleware 	= $('#projMW');
+		fields.application  = $('#projApp');
+		fields.cpu			= $('#projCPU');
+		fields.memory		= $('#projMemory');
+		fields.dev			= $('#assignedDev');
+		fields.ba			= $('#assignedBA');
+		fields.qa			= $('#assignedQA');
+		fields.op			= $('#assignedOPs');
+	}
+	
+	if(status == "update" && useraccess == "bu"){
+		fields.projPSD		= $('#projPSD');
+		fields.projPFD		= $('#projPFD');
+		fields.projASD	 	= $('#projASD');
+		fields.projACD		= $('#projACD');
+	}
+	
+	return checkFields(fields);
+}
+
+// Added By Bryan
+function checkFields(fields){
+	var reg = /[^A-Za-z0-9^.*?\s \-\,+#]/;
+	var errorFieldsCount = 0;
+	
+	for(var x in fields){
+
+		var field = (fields[x].val() == null || fields[x].val().length == 0) ? "invalid" : fields[x].val();
+		
+		if(fields[x].val() == null || fields[x].val().length == 0 || reg.test(field)){
+			fields[x].css("border", "1px solid #EF4836");
+			errorFieldsCount++;
+		}else{
+			fields[x].css("border", "");
+		}
+	}
+	
+	return errorFieldsCount;
 }
 
 function insertProj(){
@@ -366,7 +445,6 @@ function prepareProjInfo(action){
 	var projInfo = {};
 	if(nvl($('#projNo').val(), '') != ''){
 		projInfo.projNo = $('#projNo').val();
-		
 	}
 	projInfo.name = $('#projName').val();
 	projInfo.businesUnit = $('#bussinessUnit').val();
